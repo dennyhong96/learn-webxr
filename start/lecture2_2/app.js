@@ -25,8 +25,8 @@ class App {
     this.camera = new THREE.PerspectiveCamera(
       60, // Field of View (DEG)
       window.innerWidth / window.innerHeight, // Aspect ratio of rendered view
-      0.1, // Near value, anything closer than this will be hidden
-      100 // Far value, anything furthur than this will be hidden
+      0.1, // Near clipping value, anything closer than this will be hidden
+      100 // Far clipping value, anything furthur than this will be hidden
     );
     this.camera.position.set(0, 0, 4); // x (east) ➡️, y (up) ⬆️, z (south) ↙️
 
@@ -58,9 +58,12 @@ class App {
     this.renderer.setSize(window.innerWidth, window.innerHeight);
   }
 
+  // render runs 60 times/sec
   render() {
     console.log("render called");
+    // Anything we want to move/change while the app is running has to be in this animation loop
     this.mesh.rotateY(0.01);
+    this.mesh.rotateX(0.01);
     this.renderer.render(this.scene, this.camera);
   }
 }
