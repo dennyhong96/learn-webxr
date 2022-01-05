@@ -1,55 +1,90 @@
-import * as THREE from '../../libs/three/three.module.js';
-import { OrbitControls } from '../../libs/three/jsm/OrbitControls.js';
+import * as THREE from "../../libs/three/three.module.js";
+import { OrbitControls } from "../../libs/three/jsm/OrbitControls.js";
 
-class App{
-	constructor(){
-		const container = document.createElement( 'div' );
-		document.body.appendChild( container );
-        
-		this.camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 100 );
-		this.camera.position.set( 0, 0, 4 );
-        
-		this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color( 0xaaaaaa );
+class App {
+  constructor() {
+    const container = document.createElement("div");
+    document.body.appendChild(container);
 
-		const ambient = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 0.3);
-		this.scene.add(ambient);
-        
-        const light = new THREE.DirectionalLight();
-        light.position.set( 0.2, 1, 1);
-        this.scene.add(light);
-			
-		this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true } );
-		this.renderer.setPixelRatio( window.devicePixelRatio );
-		this.renderer.setSize( window.innerWidth, window.innerHeight );
-		container.appendChild( this.renderer.domElement );
-		
-        //Replace Box with Circle, Cone, Cylinder, Dodecahedron, Icosahedron, Octahedron, Plane, Sphere, Tetrahedron, Torus or TorusKnot
-        const geometry = new THREE.BoxBufferGeometry(); 
-        
-        const material = new THREE.MeshStandardMaterial( { color: 0xFF0000 });
+    // We need a scene so we can add objects and lights
+    this.scene = new THREE.Scene();
+    this.scene.background = new THREE.Color(0xaaaaaa);
 
-        this.mesh = new THREE.Mesh( geometry, material );
-        
-        this.scene.add(this.mesh);
-        
-        const controls = new OrbitControls( this.camera, this.renderer.domElement );
-        
-        this.renderer.setAnimationLoop(this.render.bind(this));
-    
-        window.addEventListener('resize', this.resize.bind(this) );
-	}	
-    
-    resize(){
-        this.camera.aspect = window.innerWidth / window.innerHeight;
-        this.camera.updateProjectionMatrix();
-        this.renderer.setSize( window.innerWidth, window.innerHeight );  
+    // Add lighting to scene
+    // ambient light does not illuminate based on location or position
+    // HemisphereLight has different color for surfaces pointing down and up
+    const ambient = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 0.3);
+    this.scene.add(ambient);
+    // DirectionalLight points from its position to the origin or a target object
+    const light = new THREE.DirectionalLight();
+    light.position.set(0.2, 1, 1);
+    this.scene.add(light);
+
+    // Camera acts as the viewer's position and orientation in the scene
+    // PerspectiveCamera means closer objects appear larger, furthur objects appear smaller
+    this.camera = new THREE.PerspectiveCamera(
+      60, // Field of View (DEG)
+      window.innerWidth / window.innerHeight, // Aspect ratio of rendered view
+      0.1, // Near clipping value, anything closer than this will be hidden
+      100 // Far clipping value, anything furthur than this will be hidden
+    );
+    this.camera.position.set(0, 0, 4); // x (east) ➡️, y (up) ⬆️, z (south) ↙️
+
+    // { antialias: true } is important for VR apps, otherwise apps will suffer from jagged edges
+    this.renderer = new THREE.WebGLRenderer({ antialias: true });
+    this.renderer.setPixelRatio(window.devicePixelRatio); // Prevent blurry graphics
+    this.renderer.setSize(window.innerWidth, window.innerHeight); // Full window
+    this.renderer.setAnimationLoop(this.render.bind(this)); // callback passed into setAnimationLoop is called up to 60 times/sec
+    // When a render is created, it creates a <canvas/> DOM element
+    container.appendChild(this.renderer.domElement);
+
+    // Add an object
+    const starShape = new THREE.Shape();
+    const outerRadius = 0.8;
+    const innerRadius = 0.4;
+    const PI2 = Math.PI * 2; // full circle
+    const inc = PI2 / 10; // 1/10 full circle
+    starShape.moveTo(outerRadius, 0);
+    let isInner = true;
+    for (let theta = inc; theta < PI2; theta += inc) {
+      const radius = isInner ? innerRadius : outerRadius;
+      starShape.lineTo(Math.cos(theta) * radius, Math.sin(theta) * radius);
+      isInner = !isInner;
     }
-    
-	render( ) {   
-        this.mesh.rotateY( 0.01 );
-        this.renderer.render( this.scene, this.camera );
-    }
+    const extrudeOptions = {
+      steps: 1,
+      depth: 1,
+      bevelEnabled: false,
+    };
+    const geometry = new THREE.ExtrudeGeometry(starShape, extrudeOptions);
+
+    // const geometry = new THREE.CircleGeometry(1, 32, 0, Math.PI); // by default, only front face is shown
+    const material = new THREE.MeshStandardMaterial({ color: 0xff0000 });
+    this.mesh = new THREE.Mesh(geometry, material); // an object is usually a mesh instance
+    this.scene.add(this.mesh);
+
+    // Allow user to interact with the camera
+    const controls = new OrbitControls(this.camera, this.renderer.domElement);
+
+    window.addEventListener("resize", this.resize.bind(this), {
+      passive: true,
+    });
+  }
+
+  resize() {
+    this.camera.aspect = window.innerWidth / window.innerHeight;
+    this.camera.updateProjectionMatrix();
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+  }
+
+  // render runs 60 times/sec
+  render() {
+    console.log("render called");
+    // Anything we want to move/change while the app is running has to be in this animation loop
+    this.mesh.rotateY(0.01);
+    this.mesh.rotateX(0.01);
+    this.renderer.render(this.scene, this.camera);
+  }
 }
 
 export { App };
