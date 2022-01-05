@@ -34,7 +34,7 @@ class App {
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
     this.renderer.setPixelRatio(window.devicePixelRatio); // Prevent blurry graphics
     this.renderer.setSize(window.innerWidth, window.innerHeight); // Full window
-    this.renderer.setAnimationLoop(this.render.bind(this)); // setAnimationLoop is called up to 60 times/sec
+    this.renderer.setAnimationLoop(this.render.bind(this)); // callback passed into setAnimationLoop is called up to 60 times/sec
     // When a render is created, it creates a <canvas/> DOM element
     container.appendChild(this.renderer.domElement);
 
