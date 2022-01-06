@@ -1,54 +1,82 @@
-import * as THREE from '../../libs/three/three.module.js';
-import { OrbitControls } from '../../libs/three/jsm/OrbitControls.js';
+import * as THREE from "../../libs/three/three.module.js";
+import { OrbitControls } from "../../libs/three/jsm/OrbitControls.js";
 
-class App{
-	constructor(){
-		const container = document.createElement( 'div' );
-		document.body.appendChild( container );
-        
-		this.camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 100 );
-		this.camera.position.set( 0, 0, 4 );
-        
-		this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color( 0xaaaaaa );
+class App {
+  constructor() {
+    const container = document.createElement("div");
+    document.body.appendChild(container);
 
-		const ambient = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 0.3);
-		this.scene.add(ambient);
-        
-        const light = new THREE.DirectionalLight();
-        light.position.set( 0.2, 1, 1);
-        this.scene.add(light);
-			
-		this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true } );
-		this.renderer.setPixelRatio( window.devicePixelRatio );
-		this.renderer.setSize( window.innerWidth, window.innerHeight );
-		container.appendChild( this.renderer.domElement );
-		
-        const geometry = new THREE.TorusKnotBufferGeometry( 0.8, 0.3, 120, 16 ); 
-        
-        const material = new THREE.MeshBasicMaterial( { color: 0xFF0000 });
+    this.camera = new THREE.PerspectiveCamera(
+      60,
+      window.innerWidth / window.innerHeight,
+      0.1,
+      100
+    );
+    this.camera.position.set(0, 0, 4);
 
-        this.mesh = new THREE.Mesh( geometry, material );
-        
-        this.scene.add(this.mesh);
-        
-        const controls = new OrbitControls( this.camera, this.renderer.domElement );
-        
-        this.renderer.setAnimationLoop(this.render.bind(this));
-    
-        window.addEventListener('resize', this.resize.bind(this) );
-	}	
-    
-    resize(){
-        this.camera.aspect = window.innerWidth / window.innerHeight;
-        this.camera.updateProjectionMatrix();
-        this.renderer.setSize( window.innerWidth, window.innerHeight );  
-    }
-    
-	render( ) {   
-        this.mesh.rotateY( 0.01 );
-        this.renderer.render( this.scene, this.camera );
-    }
+    this.scene = new THREE.Scene();
+    this.scene.background = new THREE.Color(0xaaaaaa);
+
+    const ambient = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 0.3);
+    this.scene.add(ambient);
+
+    const light = new THREE.DirectionalLight();
+    light.position.set(0.2, 1, 1);
+    this.scene.add(light);
+
+    this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    this.renderer.setPixelRatio(window.devicePixelRatio);
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    container.appendChild(this.renderer.domElement);
+
+    const geometry = new THREE.TorusKnotBufferGeometry(0.8, 0.3, 120, 16);
+
+    // Simple shaded material (flat), not affected by lights
+    // const material = new THREE.MeshBasicMaterial({
+    //   color: 0x00ff00,
+    // });
+
+    // Material for non-shiny surfaces, without specular highlights
+    // const material = new THREE.MeshLambertMaterial({
+    //   color: 0x00ff00,
+    // });
+
+    // Material for shiny surfaces iwth specular highlights
+    // const material = new THREE.MeshPhongMaterial({
+    //   color: 0x00ff00,
+    //   specular: 0x444444,
+    //   shininess: 60,
+    // });
+
+    // Complex material
+    const material = new THREE.MeshStandardMaterial({
+      color: 0x2194ce,
+      roughness: 0,
+      metalness: 0.75,
+      envMaps: "reflection",
+    });
+
+    this.mesh = new THREE.Mesh(geometry, material);
+
+    this.scene.add(this.mesh);
+
+    const controls = new OrbitControls(this.camera, this.renderer.domElement);
+
+    this.renderer.setAnimationLoop(this.render.bind(this));
+
+    window.addEventListener("resize", this.resize.bind(this));
+  }
+
+  resize() {
+    this.camera.aspect = window.innerWidth / window.innerHeight;
+    this.camera.updateProjectionMatrix();
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+  }
+
+  render() {
+    this.mesh.rotateY(0.01);
+    this.renderer.render(this.scene, this.camera);
+  }
 }
 
 export { App };
