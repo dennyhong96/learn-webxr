@@ -41,7 +41,7 @@ class App {
     //   color: 0x00ff00,
     // });
 
-    // Material for shiny surfaces iwth specular highlights
+    // Material for shiny surfaces with specular highlights
     // const material = new THREE.MeshPhongMaterial({
     //   color: 0x00ff00,
     //   specular: 0x444444,
